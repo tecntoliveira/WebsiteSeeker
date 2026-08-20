@@ -1593,7 +1593,7 @@ export default function BusinessDetailPage() {
     if (owner === "shared") {
       return "Shared";
     }
-    return "Curb";
+    return "WebsiteSeeker";
   }
 
   function saleStatusLabel(status: SaleData["status"]) {
@@ -2874,7 +2874,7 @@ export default function BusinessDetailPage() {
                                   />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="curb">Curb</SelectItem>
+                                  <SelectItem value="curb">WebsiteSeeker</SelectItem>
                                   <SelectItem value="client">Client</SelectItem>
                                   <SelectItem value="shared">Shared</SelectItem>
                                 </SelectContent>

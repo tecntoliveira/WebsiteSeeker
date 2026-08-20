@@ -27,10 +27,10 @@ export function Sidebar() {
     <aside className="flex w-56 shrink-0 flex-col border-r border-border/40 bg-zinc-950 text-zinc-300">
       <div className="flex h-14 items-center gap-2.5 border-b border-white/10 px-5">
         <div className="flex size-7 items-center justify-center rounded-lg bg-white font-bold text-zinc-950 text-sm">
-          C
+          W
         </div>
         <span className="text-lg font-semibold tracking-tight text-white">
-          Curb
+          WebsiteSeeker
         </span>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
@@ -58,7 +58,7 @@ export function Sidebar() {
         })}
       </nav>
       <div className="border-t border-white/10 px-5 py-4">
-        <p className="text-xs text-zinc-500">Curb v0.1.0</p>
+        <p className="text-xs text-zinc-500">WebsiteSeeker v0.1.0</p>
       </div>
     </aside>
   );

@@ -15,7 +15,7 @@ const monoFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Curb - Local Business Platform",
+  title: "WebsiteSeeker - Local Business Platform",
   description: "Discover, audit, and generate sites for local businesses",
 };
 

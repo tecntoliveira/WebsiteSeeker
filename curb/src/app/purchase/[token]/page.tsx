@@ -141,7 +141,7 @@ export default function PurchaseStatusPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="space-y-2">
           <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
-            Curb Purchase
+            WebsiteSeeker Purchase
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">
             {purchase.businessName}
