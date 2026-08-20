@@ -20,8 +20,8 @@ out/
 
 # Local generated content
 sites/
-!app/src/app/api/sites/
-!app/src/app/api/sites/**
+!curb/src/app/api/sites/
+!curb/src/app/api/sites/**
 site-backups/
 output/
 

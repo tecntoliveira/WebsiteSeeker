@@ -9,7 +9,7 @@ Curb is a local-first outbound website generator for local businesses. It discov
 - Never ask an agent to modify Curb production data, deployment credentials, payment data, or send outreach without an explicit approved Curb action.
 
 ## Repository Rules
-- The Curb app is a Next.js 16 application under `app/`.
+- The Curb app is a Next.js 16 application under `curb/`.
 - Curb uses SQLite via `better-sqlite3`.
 - Generated static sites live under `sites/<slug>/`.
 - Site changes must preserve Curb's bundle validation and promotion pipeline.

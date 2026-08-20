@@ -6,10 +6,10 @@ RUN apt-get update \
   && apt-get install --no-install-recommends -y python3 make g++ \
   && rm -rf /var/lib/apt/lists/*
 
-COPY app/package.json ./package.json
+COPY curb/package.json ./package.json
 RUN npm install
 
-COPY app/ ./
+COPY curb/ ./
 RUN npm run build
 RUN npx playwright install --with-deps chromium
 

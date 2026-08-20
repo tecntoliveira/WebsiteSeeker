@@ -74,7 +74,7 @@ This is not another generic AI site builder. It is an outbound engine for sellin
 - `sites/` stores generated websites.
 - `site-backups/` stores automatic edit backups for generated sites.
 - `.curb-runtime/` stores launcher and runtime state.
-- `app/` contains the local dashboard and API routes.
+- `curb/` contains the local dashboard and API routes.
 - No auth is required just to use the product.
 
 Local runtime data and customer artifacts stay on your machine and should stay out of git.
@@ -124,7 +124,7 @@ The one-click launchers run a production build on first launch, then reuse that 
 Manual development:
 
 ```bash
-cd app
+cd curb
 npm install
 npm run dev
 ```
@@ -145,7 +145,7 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 ```text
 curb/
-├── app/               # Next.js dashboard and local API routes
+├── curb/               # Next.js dashboard and local API routes
 ├── sites/             # generated static sites (local, gitignored)
 ├── site-backups/      # automatic edit backups (local, gitignored)
 ├── prompts/           # AI prompt templates

@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(SCRIPT_DIR, "..");
-const APP_DIR = path.join(ROOT_DIR, "app");
+const APP_DIR = path.join(ROOT_DIR, "curb");
 const RUNTIME_DIR = path.join(ROOT_DIR, ".curb-runtime");
 const LAUNCH_INFO_PATH = path.join(RUNTIME_DIR, "launch-info.json");
 const BUILD_INFO_PATH = path.join(RUNTIME_DIR, "build-info.json");

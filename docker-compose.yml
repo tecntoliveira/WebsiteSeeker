@@ -52,7 +52,7 @@ services:
       - agentic-audit:/opt/agentic-os/audit
       - agentic-backups:/opt/agentic-os/backups
       - agentic-workspaces:/workspaces/tasks
-      - ./app:/workspaces/curb/app:ro
+      - ./curb:/workspaces/curb/app:ro
       - ./prompts:/workspaces/curb/prompts:ro
       - ./README.md:/workspaces/curb/README.md:ro
     networks:
