@@ -1,0 +1,97 @@
+services:
+  curb:
+    build:
+      context: .
+      dockerfile: docker/curb.Dockerfile
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      CURB_DB_PATH: /var/lib/curb/curb.db
+      AGENTIC_OS_URL: http://agentic-os:8080
+      AGENTIC_OS_API_TOKEN: ${AGENTIC_OS_API_TOKEN:?Set AGENTIC_OS_API_TOKEN in .env}
+    ports:
+      - "${CURB_PORT:-3000}:3000"
+    volumes:
+      - curb-data:/var/lib/curb
+      - curb-sites:/opt/curb/sites
+      - curb-site-backups:/opt/curb/site-backups
+      - curb-runtime:/opt/curb/.curb-runtime
+    networks:
+      - curb-control
+      - curb-egress
+    depends_on:
+      agentic-os:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  agentic-os:
+    build:
+      context: ./agentic-os
+      dockerfile: ../docker/agentic-os.Dockerfile
+      args:
+        INSTALL_OPENCODE: ${INSTALL_OPENCODE:-false}
+    init: true
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: "1"
+      AGENTIC_OS_API_TOKEN: ${AGENTIC_OS_API_TOKEN:?Set AGENTIC_OS_API_TOKEN in .env}
+      AGENTIC_OS_PORT: 8080
+      AGENTIC_WORKSPACE_ROOT: /workspaces
+      AGENTIC_DEFAULT_WORKSPACE: curb
+    expose:
+      - "8080"
+    volumes:
+      - agentic-data:/opt/agentic-os/data
+      - agentic-brain:/opt/agentic-os/brain
+      - agentic-audit:/opt/agentic-os/audit
+      - agentic-backups:/opt/agentic-os/backups
+      - agentic-workspaces:/workspaces/tasks
+      - ./app:/workspaces/curb/app:ro
+      - ./prompts:/workspaces/curb/prompts:ro
+      - ./README.md:/workspaces/curb/README.md:ro
+    networks:
+      - curb-control
+      - agentic-egress
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/status', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    mem_limit: 2g
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+
+networks:
+  curb-control:
+    internal: true
+  curb-egress:
+    driver: bridge
+  agentic-egress:
+    driver: bridge
+
+volumes:
+  curb-data:
+  curb-sites:
+  curb-site-backups:
+  curb-runtime:
+  agentic-data:
+  agentic-brain:
+  agentic-audit:
+  agentic-backups:
+  agentic-workspaces:

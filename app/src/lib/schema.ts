@@ -1,0 +1,385 @@
+import { initializeSettingsStore } from "./config";
+import { getDb } from "./db";
+
+function ensureColumn(
+  table: string,
+  column: string,
+  definition: string
+): void {
+  const db = getDb();
+  const columns = db
+    .prepare(`PRAGMA table_info(${table})`)
+    .all() as Array<{ name: string }>;
+
+  if (columns.some((entry) => entry.name === column)) {
+    return;
+  }
+
+  db.exec(`ALTER TABLE ${table} ADD COLUMN ${definition}`);
+}
+
+export function initializeDatabase(): void {
+  const db = getDb();
+
+  initializeSettingsStore();
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS businesses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      place_id TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      slug TEXT UNIQUE NOT NULL,
+      category TEXT,
+      address TEXT,
+      city TEXT,
+      province TEXT,
+      postal_code TEXT,
+      phone TEXT,
+      email TEXT,
+      website_url TEXT,
+      google_maps_url TEXT,
+      latitude REAL,
+      longitude REAL,
+      rating REAL,
+      review_count INTEGER,
+      hours_json TEXT,
+      photos_json TEXT,
+      status TEXT DEFAULT 'discovered',
+      enrichment_status TEXT DEFAULT 'pending',
+      details_enriched_at TEXT,
+      enrichment_started_at TEXT,
+      enrichment_completed_at TEXT,
+      enrichment_error TEXT,
+      enrichment_attempts INTEGER DEFAULT 0,
+      customer_domain TEXT,
+      customer_domain_verified BOOLEAN DEFAULT 0,
+      customer_domain_verification_json TEXT,
+      customer_project_provider TEXT,
+      customer_project_metadata_json TEXT,
+      provider_activation_json TEXT,
+      vercel_customer_project_id TEXT,
+      vercel_customer_project_name TEXT,
+      notes TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS audits (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      business_id INTEGER NOT NULL REFERENCES businesses(id),
+      has_website BOOLEAN NOT NULL,
+      url_reachable BOOLEAN,
+      overall_grade TEXT,
+      owner_sentiment TEXT,
+      notes TEXT,
+      screenshot_path TEXT,
+      strengths_json TEXT,
+      issues_json TEXT,
+      website_complexity TEXT,
+      replacement_difficulty TEXT,
+      advanced_features_json TEXT,
+      capability_profile_json TEXT,
+      review_json TEXT,
+      audit_version INTEGER,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS generated_sites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      business_id INTEGER NOT NULL REFERENCES businesses(id),
+      version INTEGER DEFAULT 1,
+      slug TEXT NOT NULL,
+      site_path TEXT NOT NULL,
+      prompt_used TEXT,
+      model_used TEXT,
+      generation_time_ms INTEGER,
+      warnings_json TEXT,
+      exported BOOLEAN DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS site_deployments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      business_id INTEGER NOT NULL REFERENCES businesses(id),
+      generated_site_id INTEGER NOT NULL REFERENCES generated_sites(id),
+      deployment_kind TEXT NOT NULL,
+      deployment_provider TEXT DEFAULT 'vercel',
+      vercel_project_id TEXT NOT NULL,
+      vercel_project_name TEXT,
+      vercel_deployment_id TEXT NOT NULL,
+      vercel_deployment_url TEXT NOT NULL,
+      alias_url TEXT,
+      alias_host TEXT,
+      target TEXT NOT NULL,
+      ready_state TEXT,
+      metadata_json TEXT,
+      active BOOLEAN DEFAULT 0,
+      error_message TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS emails (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      business_id INTEGER NOT NULL REFERENCES businesses(id),
+      subject TEXT NOT NULL,
+      body TEXT NOT NULL,
+      to_address TEXT,
+      status TEXT DEFAULT 'draft',
+      sent_at TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS discovery_runs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      location_query TEXT NOT NULL,
+      latitude REAL,
+      longitude REAL,
+      radius_km INTEGER,
+      categories TEXT,
+      results_count INTEGER,
+      new_count INTEGER,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS activity_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind TEXT NOT NULL,
+      stage TEXT NOT NULL,
+      business_id INTEGER REFERENCES businesses(id),
+      business_name TEXT,
+      message TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS sales (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      business_id INTEGER NOT NULL REFERENCES businesses(id),
+      public_token TEXT UNIQUE NOT NULL,
+      mode TEXT NOT NULL DEFAULT 'handoff',
+      status TEXT NOT NULL DEFAULT 'draft',
+      currency TEXT NOT NULL DEFAULT 'usd',
+      one_time_amount_cents INTEGER NOT NULL DEFAULT 0,
+      monthly_amount_cents INTEGER NOT NULL DEFAULT 0,
+      description TEXT,
+      customer_email TEXT,
+      customer_name TEXT,
+      notes TEXT,
+      stripe_payment_link_id TEXT,
+      stripe_payment_link_url TEXT,
+      stripe_checkout_session_id TEXT,
+      stripe_customer_id TEXT,
+      stripe_subscription_id TEXT,
+      paid_at TEXT,
+      fulfilled_at TEXT,
+      error_message TEXT,
+      metadata_json TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS activation_jobs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      business_id INTEGER NOT NULL REFERENCES businesses(id),
+      sale_id INTEGER REFERENCES sales(id),
+      kind TEXT NOT NULL DEFAULT 'post-payment-activation',
+      status TEXT NOT NULL DEFAULT 'queued',
+      attempt_count INTEGER NOT NULL DEFAULT 0,
+      error_message TEXT,
+      result_json TEXT,
+      started_at TEXT,
+      completed_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_businesses_status ON businesses(status);
+    CREATE INDEX IF NOT EXISTS idx_businesses_category ON businesses(category);
+    CREATE INDEX IF NOT EXISTS idx_audits_business_id ON audits(business_id);
+    CREATE INDEX IF NOT EXISTS idx_generated_sites_business_id ON generated_sites(business_id);
+    CREATE INDEX IF NOT EXISTS idx_site_deployments_business_kind ON site_deployments(business_id, deployment_kind, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_site_deployments_generated_site_id ON site_deployments(generated_site_id);
+    CREATE INDEX IF NOT EXISTS idx_emails_business_id ON emails(business_id);
+    CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_sales_business_id ON sales(business_id, created_at DESC, id DESC);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_sales_public_token ON sales(public_token);
+    CREATE INDEX IF NOT EXISTS idx_activation_jobs_business_id ON activation_jobs(business_id, created_at DESC, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_activation_jobs_status ON activation_jobs(status, created_at ASC, id ASC);
+  `);
+
+  ensureColumn("audits", "owner_sentiment", "owner_sentiment TEXT");
+  ensureColumn("audits", "screenshot_path", "screenshot_path TEXT");
+  ensureColumn("audits", "strengths_json", "strengths_json TEXT");
+  ensureColumn("audits", "issues_json", "issues_json TEXT");
+  ensureColumn("audits", "website_complexity", "website_complexity TEXT");
+  ensureColumn(
+    "audits",
+    "replacement_difficulty",
+    "replacement_difficulty TEXT"
+  );
+  ensureColumn(
+    "audits",
+    "advanced_features_json",
+    "advanced_features_json TEXT"
+  );
+  ensureColumn(
+    "audits",
+    "capability_profile_json",
+    "capability_profile_json TEXT"
+  );
+  ensureColumn("audits", "review_json", "review_json TEXT");
+  ensureColumn("audits", "audit_version", "audit_version INTEGER");
+  ensureColumn(
+    "businesses",
+    "enrichment_status",
+    "enrichment_status TEXT DEFAULT 'pending'"
+  );
+  ensureColumn(
+    "businesses",
+    "details_enriched_at",
+    "details_enriched_at TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "enrichment_started_at",
+    "enrichment_started_at TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "enrichment_completed_at",
+    "enrichment_completed_at TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "enrichment_error",
+    "enrichment_error TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "enrichment_attempts",
+    "enrichment_attempts INTEGER DEFAULT 0"
+  );
+  ensureColumn("businesses", "customer_domain", "customer_domain TEXT");
+  ensureColumn(
+    "businesses",
+    "customer_domain_verified",
+    "customer_domain_verified BOOLEAN DEFAULT 0"
+  );
+  ensureColumn(
+    "businesses",
+    "customer_domain_verification_json",
+    "customer_domain_verification_json TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "customer_project_provider",
+    "customer_project_provider TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "customer_project_metadata_json",
+    "customer_project_metadata_json TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "provider_activation_json",
+    "provider_activation_json TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "vercel_customer_project_id",
+    "vercel_customer_project_id TEXT"
+  );
+  ensureColumn(
+    "businesses",
+    "vercel_customer_project_name",
+    "vercel_customer_project_name TEXT"
+  );
+  ensureColumn(
+    "site_deployments",
+    "deployment_provider",
+    "deployment_provider TEXT DEFAULT 'vercel'"
+  );
+  ensureColumn(
+    "site_deployments",
+    "metadata_json",
+    "metadata_json TEXT"
+  );
+  ensureColumn("sales", "public_token", "public_token TEXT");
+  ensureColumn("sales", "mode", "mode TEXT NOT NULL DEFAULT 'handoff'");
+  ensureColumn("sales", "status", "status TEXT NOT NULL DEFAULT 'draft'");
+  ensureColumn("sales", "currency", "currency TEXT NOT NULL DEFAULT 'usd'");
+  ensureColumn(
+    "sales",
+    "one_time_amount_cents",
+    "one_time_amount_cents INTEGER NOT NULL DEFAULT 0"
+  );
+  ensureColumn(
+    "sales",
+    "monthly_amount_cents",
+    "monthly_amount_cents INTEGER NOT NULL DEFAULT 0"
+  );
+  ensureColumn("sales", "description", "description TEXT");
+  ensureColumn("sales", "customer_email", "customer_email TEXT");
+  ensureColumn("sales", "customer_name", "customer_name TEXT");
+  ensureColumn("sales", "notes", "notes TEXT");
+  ensureColumn(
+    "sales",
+    "stripe_payment_link_id",
+    "stripe_payment_link_id TEXT"
+  );
+  ensureColumn(
+    "sales",
+    "stripe_payment_link_url",
+    "stripe_payment_link_url TEXT"
+  );
+  ensureColumn(
+    "sales",
+    "stripe_checkout_session_id",
+    "stripe_checkout_session_id TEXT"
+  );
+  ensureColumn("sales", "stripe_customer_id", "stripe_customer_id TEXT");
+  ensureColumn(
+    "sales",
+    "stripe_subscription_id",
+    "stripe_subscription_id TEXT"
+  );
+  ensureColumn("sales", "paid_at", "paid_at TEXT");
+  ensureColumn("sales", "fulfilled_at", "fulfilled_at TEXT");
+  ensureColumn("sales", "error_message", "error_message TEXT");
+  ensureColumn("sales", "metadata_json", "metadata_json TEXT");
+  ensureColumn(
+    "activation_jobs",
+    "attempt_count",
+    "attempt_count INTEGER NOT NULL DEFAULT 0"
+  );
+  ensureColumn("activation_jobs", "error_message", "error_message TEXT");
+  ensureColumn("activation_jobs", "result_json", "result_json TEXT");
+  ensureColumn("activation_jobs", "started_at", "started_at TEXT");
+  ensureColumn("activation_jobs", "completed_at", "completed_at TEXT");
+  ensureColumn("generated_sites", "warnings_json", "warnings_json TEXT");
+
+  db.prepare(
+    "UPDATE businesses SET enrichment_status = 'pending' WHERE enrichment_status IS NULL"
+  ).run();
+  db.prepare(
+    "UPDATE businesses SET enrichment_attempts = 0 WHERE enrichment_attempts IS NULL"
+  ).run();
+  db.prepare(`
+    UPDATE businesses
+    SET details_enriched_at = COALESCE(updated_at, created_at)
+    WHERE details_enriched_at IS NULL
+      AND (
+        website_url IS NOT NULL
+        OR google_maps_url IS NOT NULL
+        OR phone IS NOT NULL
+        OR city IS NOT NULL
+        OR hours_json IS NOT NULL
+      )
+  `).run();
+  db.prepare(`
+    UPDATE businesses
+    SET customer_domain_verified = 0
+    WHERE customer_domain_verified IS NULL
+  `).run();
+}

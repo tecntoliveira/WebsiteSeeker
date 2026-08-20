@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Launcher runtime
+.curb-runtime/
+
+# Local generated content
+sites/
+!app/src/app/api/sites/
+!app/src/app/api/sites/**
+site-backups/
+output/
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+
+# Playwright artifacts
+.playwright/
+.playwright-cli/
+playwright-report/
+test-results/
+blob-report/
+output/playwright/
