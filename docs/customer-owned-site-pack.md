@@ -1,6 +1,6 @@
 # Customer-Owned Site Pack
 
-This is the default operating model for Curb when a sold website needs light
+This is the default operating model for WebsiteSeeker when a sold website needs light
 owner edits and optional lightweight commerce without turning the agency into
 the long-term hosting bottleneck.
 

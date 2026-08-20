@@ -1,8 +1,8 @@
-# Curb + Agentic OS Integration
+# WebsiteSeeker — Curb + Agentic OS Integration
 
 ## Runtime model
 
-Curb is the domain application. Agentic OS is the private planning, memory, routing, and task service.
+WebsiteSeeker is powered by **Curb** (the domain application) and **Agentic OS** (the private planning, memory, routing, and task service).
 
 - Curb owns business data, generated sites, validation, previews, deployments, outreach, payments, and deployment credentials.
 - Agentic OS owns project context, tasks, research, agent execution, memory, scheduling, and audit history.

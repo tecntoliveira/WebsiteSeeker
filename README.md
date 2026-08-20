@@ -1,24 +1,26 @@
 
 <p align="center">
-  <img src="curb-readme.png" alt="Curb" width="600" />
+  <img src="curb-readme.png" alt="WebsiteSeeker" width="600" />
 </p>
+
+<p align="center"><strong>WebsiteSeeker</strong> — powered by <strong>Curb</strong> and <strong>Agentic OS</strong></p>
 
 <p align="center"><strong>Cold outreach with receipts.</strong></p>
 
 <p align="center">Discover weak local-business sites, rebuild them locally, and send the finished preview in the first email.</p>
 
-Curb is a local-first, one-shot website generator for local businesses.
+WebsiteSeeker is a local-first, one-shot website generator for local businesses. It's powered by **Curb** (the local site engine) and **Agentic OS** (the private AI agent service).
 
 It helps you find a nearby business with no site or a weak one, generate a replacement, preview it locally, and make your first sales contact by emailing them the finished website.
 
 Most web design outreach sells possibility.
 
-Curb sells proof.
+WebsiteSeeker sells proof.
 
 ## Product Tour
 
 <p align="center">
-  <img src="./docs/readme-slideshow.gif" alt="Curb dashboard, discovery workflow, businesses pipeline board, and generated site preview." width="100%" />
+  <img src="./docs/readme-slideshow.gif" alt="WebsiteSeeker dashboard, discovery workflow, businesses pipeline board, and generated site preview." width="100%" />
 </p>
 
 ## The Pitch
@@ -27,7 +29,7 @@ Instead of sending:
 
 > "Hey, I could redesign your website."
 
-Curb lets you send:
+WebsiteSeeker lets you send:
 
 > "Hey, I already rebuilt it. Here it is."
 
@@ -35,7 +37,7 @@ That changes the conversation. The cold email is no longer a pitch for hypotheti
 
 This is not another generic AI site builder. It is an outbound engine for selling websites to local businesses by building first and asking second.
 
-## What Curb Does
+## What WebsiteSeeker Does
 
 - Discovers local businesses through Google Places
 - Enriches business records with contact and location data
@@ -165,18 +167,18 @@ curb/
 
 ## Who It's For
 
-Curb is for people who sell websites to local businesses and want a tighter loop than:
+WebsiteSeeker is for people who sell websites to local businesses and want a tighter loop than:
 
 1. Cold email
 2. Discovery call
 3. Proposal
 4. Maybe build
 
-If you believe the fastest close is showing the work before the meeting exists, Curb is built for that.
+If you believe the fastest close is showing the work before the meeting exists, WebsiteSeeker is built for that.
 
 ## Status
 
-Curb is opinionated, local-first, and optimized for one-shot website sales.
+WebsiteSeeker is opinionated, local-first, and optimized for one-shot website sales.
 
 It is not trying to be a collaborative SaaS CMS or a custom backend generator.
 
@@ -190,4 +192,4 @@ It is trying to make outbound feel like a before-and-after reveal.
 
 ## One-Line Version
 
-Curb is outbound web design run backwards: build first, email second.
+WebsiteSeeker is outbound web design run backwards: build first, email second.
