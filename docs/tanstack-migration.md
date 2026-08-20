@@ -14,6 +14,19 @@ while preserving behavior and keeping the domain logic untouched.
 Naming: **WebsiteSeeker** is the product. **Curb** is the app/engine that
 powers it, alongside the vendored **Agentic OS** service.
 
+## Current status of TanStack Start (verified 2026-08-20)
+
+- `@tanstack/react-start` npm `latest` = **1.168.48** (a real 1.x semver, no
+  prerelease suffix). Total ~220M downloads, ~18.3M/week, ~15k GitHub stars.
+- The official docs still brand Start as **"RC"**, and active `alpha`
+  (`1.132.0-alpha.25`) and `pre` (`1.168.33-pre.0`) channels exist — the API is
+  still evolving. Pin the version and treat upgrades as potentially breaking.
+- **Node requirement: `>=22.12.0`.** The app currently targets Node 20
+  (`docker/curb.Dockerfile` uses `node:20-bookworm-slim`; README says
+  "Node.js 20+"). This is a prerequisite change, not just a code change.
+- Docs include a "Migrate from Next.js" guide and a "Start vs Next.js"
+  comparison — use those as the authoritative mapping.
+
 ## What is already framework-agnostic
 
 The migration is confined almost entirely to the `curb/src/app/` layer.
@@ -109,6 +122,7 @@ Measured across `curb/src/`:
 
 ### Phase 1 — Scaffold side-by-side
 
+- Bump Node to `>=22.12.0` (Docker base image, README requirements, launcher).
 - Add TanStack Start + Vite tooling to `curb/` without removing Next.js.
 - Bring over `src/lib` and `src/components` unchanged.
 - Keep `next dev` working so the app stays runnable throughout.
@@ -191,8 +205,9 @@ Measured across `curb/src/`:
 
 ## Risks
 
-- TanStack Start is pre-1.0; API surface may shift between versions. Pin a
-  version and re-verify on upgrades.
+- TanStack Start ships a 1.x `latest` on npm but is still self-labeled RC with
+  active alpha/pre channels; the API surface may shift. Pin the version and
+  re-verify on every upgrade.
 - The migration is large but mechanical; the risk is concentrated in the
   static-site server and the vendored fork, not the bulk of the route handlers.
 
